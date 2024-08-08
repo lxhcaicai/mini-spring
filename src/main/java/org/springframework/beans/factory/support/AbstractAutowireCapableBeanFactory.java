@@ -25,7 +25,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             // 为bean填充属性
             applyPropertyValue(beanName, bean, beanDefinition);
             //执行bean的初始化方法和BeanPostProcessor的前置和后置处理方法
-            bean = initializeBean(beanName,bean,beanDefinition);
+            initializeBean(beanName,bean,beanDefinition);
         } catch (Exception e) {
             throw new BeansException("Instantiation of bean failed", e);
         }
@@ -109,7 +109,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
     protected void invokeInitMethods(String beanName,Object bean, BeanDefinition beanDefinition) {
         //TODO 后面会实现
-        System.out.println("执行bean[" + beanName + "]的初始化方法");
     }
 
     public InstantiationStrategy getInstantiationStrategy() {
