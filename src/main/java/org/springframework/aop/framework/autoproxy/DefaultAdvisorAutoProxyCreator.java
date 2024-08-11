@@ -32,25 +32,17 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        return bean;
-    }
-
-    @Override
-    public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
         //避免死循环
-        if (isInfrastructureClass(beanClass)) {
-            return null;
+        if (isInfrastructureClass(bean.getClass())) {
+            return bean;
         }
 
         Collection<AspectJExpressionPointcutAdvisor> advisors = beanFactory.getBeansOfType(AspectJExpressionPointcutAdvisor.class).values();
         try {
             for (AspectJExpressionPointcutAdvisor advisor : advisors) {
                 ClassFilter classFilter = advisor.getPointcut().getClassFilter();
-                if (classFilter.matches(beanClass)) {
+                if (classFilter.matches(bean.getClass())) {
                     AdvisedSupport advisedSupport = new AdvisedSupport();
-
-                    BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-                    Object bean = beanFactory.getInstantiationStrategy().instantiate(beanDefinition);
                     TargetSource targetSource = new TargetSource(bean);
                     advisedSupport.setTargetSource(targetSource);
                     advisedSupport.setMethodInterceptor((MethodInterceptor) advisor.getAdvice());
@@ -63,7 +55,17 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
         } catch (Exception ex) {
             throw new BeansException("Error create proxy bean for: " + beanName, ex);
         }
+        return bean;
+    }
+
+    @Override
+    public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
         return null;
+    }
+
+    @Override
+    public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
+        return true;
     }
 
     @Override
